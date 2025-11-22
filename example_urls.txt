@@ -1,0 +1,17 @@
+# Example URLs for Joy Search Engine Indexing
+# These are sample positive news sources - replace with your own
+
+# Good News Sites
+https://www.goodnewsnetwork.org/
+https://www.positive.news/
+https://www.happynews.com/
+
+# Educational & Inspiring
+https://www.ted.com/
+https://www.khanacademy.org/
+
+# Science & Discovery
+https://www.nasa.gov/
+https://www.space.com/
+
+# Add your own positive content sources below:
