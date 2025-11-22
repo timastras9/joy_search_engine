@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joy Search - Positive Content Only</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .tagline {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 50px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1.1em;
+            padding: 10px;
+        }
+
+        .search-box button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .search-box button:hover {
+            transform: scale(1.05);
+        }
+
+        .search-box button:active {
+            transform: scale(0.95);
+        }
+
+        .stats {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .results {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-height: 400px;
+        }
+
+        .result-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+            transition: background 0.2s;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-item:hover {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 0 -20px;
+        }
+
+        .result-title {
+            font-size: 1.3em;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .result-title:hover {
+            color: #764ba2;
+        }
+
+        .result-url {
+            color: #28a745;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .result-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .result-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .sentiment-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .sentiment-positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .sentiment-neutral {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .pagination button:hover {
+            background: #764ba2;
+        }
+
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Joy Search</h1>
+            <p class="tagline">Only Positive Content • No Negativity • Powered by Quantum AI</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for positive, uplifting content..." />
+            <button onclick="search()">Search</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <span class="stat-value" id="totalDocs">-</span>
+                <span class="stat-label">Positive Articles</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="minSentiment">-</span>
+                <span class="stat-label">Min Sentiment Score</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalFiltered">-</span>
+                <span class="stat-label">Negative Content Filtered</span>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="no-results">
+                <div class="no-results-icon">🔍</div>
+                <h2>Search for positive content</h2>
+                <p>Enter keywords above to find uplifting articles, happy news, and inspiring stories</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Built with ❤️ using <a href="https://github.com/timastras9/quantum-sentiment-gnn" target="_blank">Quantum GNN</a></p>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        const pageSize = 10;
+
+        // Load stats on page load
+        loadStats();
+
+        // Enable search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                search();
+            }
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+
+                document.getElementById('totalDocs').textContent = stats.total_documents.toLocaleString();
+                document.getElementById('minSentiment').textContent = (stats.min_sentiment_score * 100).toFixed(0) + '%';
+                document.getElementById('totalFiltered').textContent = stats.total_filtered.toLocaleString();
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        async function search(page = 0) {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            currentPage = page;
+            const resultsDiv = document.getElementById('results');
+
+            // Show loading
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching for positive content...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
+                const data = await response.json();
+
+                if (data.documents && data.documents.length > 0) {
+                    displayResults(data);
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <div class="no-results-icon">😊</div>
+                            <h2>No results found</h2>
+                            <p>Try different keywords or check back later as we index more positive content!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">⚠️</div>
+                        <h2>Search Error</h2>
+                        <p>Failed to search. Make sure the server is running.</p>
+                        <p style="color: #dc3545; margin-top: 10px;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+
+            data.documents.forEach(doc => {
+                const sentimentScore = (doc.sentiment_score * 100).toFixed(0);
+                const sentimentClass = doc.sentiment_score >= 0.8 ? 'sentiment-positive' : 'sentiment-neutral';
+                const sentimentLabel = doc.sentiment_score >= 0.8 ? 'Very Positive' : 'Positive';
+
+                html += `
+                    <div class="result-item">
+                        <a href="${doc.url}" target="_blank" class="result-title">${doc.title || 'Untitled'}</a>
+                        <span class="result-url">${doc.url}</span>
+                        <p class="result-description">${doc.description || doc.content.substring(0, 200) + '...'}</p>
+                        <div class="result-meta">
+                            <span class="sentiment-badge ${sentimentClass}">${sentimentLabel} ${sentimentScore}%</span>
+                            ${doc.author ? `<span>By ${doc.author}</span>` : ''}
+                            ${doc.published_at ? `<span>${new Date(doc.published_at).toLocaleDateString()}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add pagination
+            const hasPrev = currentPage > 0;
+            const hasNext = data.total > (currentPage + 1) * pageSize;
+
+            html += `
+                <div class="pagination">
+                    <button onclick="search(${currentPage - 1})" ${!hasPrev ? 'disabled' : ''}>← Previous</button>
+                    <span style="color: #888; display: flex; align-items: center;">
+                        Page ${currentPage + 1} of ${Math.ceil(data.total / pageSize)}
+                    </span>
+                    <button onclick="search(${currentPage + 1})" ${!hasNext ? 'disabled' : ''}>Next →</button>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

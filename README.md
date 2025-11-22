@@ -70,15 +70,63 @@ go run cmd/indexer/main.go \
 go run cmd/server/main.go --port 8080
 ```
 
-### 4. Search for Positive Content
+### 4. Open Web Interface
+
+Open your browser and navigate to:
+```
+http://localhost:8080
+```
+
+**Or use the API directly:**
 
 ```bash
 # Search query
-curl http://localhost:8080/search?q=happy+news&page=0&size=10
+curl http://localhost:8080/api/search?q=happy+news&page=0&size=10
 
 # Get document by URL
-curl http://localhost:8080/document?url=https://example.com/article
+curl http://localhost:8080/api/document?url=https://example.com/article
+
+# Get statistics
+curl http://localhost:8080/api/stats
 ```
+
+## Testing the Search Engine
+
+### Quick Test (Without Quantum GNN)
+
+For testing without the quantum GNN server, you can index some sample URLs:
+
+```bash
+# 1. Index some positive news sites
+go run cmd/indexer/main.go --url https://www.goodnewsnetwork.org/
+
+# 2. Start the web server
+go run cmd/server/main.go --port 8080
+
+# 3. Open http://localhost:8080 in your browser
+```
+
+**Note**: Without the quantum GNN server running, sentiment analysis will fail. For full functionality, follow the complete setup above.
+
+### Full Test (With Quantum GNN)
+
+1. **Terminal 1** - Start quantum GNN MCP server:
+   ```bash
+   cd ../quantum-sentiment-gnn
+   go run cmd/serve-mcp/main.go --port 8081
+   ```
+
+2. **Terminal 2** - Index content:
+   ```bash
+   go run cmd/indexer/main.go --urls example_urls.txt --workers 5
+   ```
+
+3. **Terminal 3** - Start web server:
+   ```bash
+   go run cmd/server/main.go --port 8080
+   ```
+
+4. **Browser** - Open `http://localhost:8080` and search for positive content!
 
 ## How It Works
 
@@ -88,3 +136,10 @@ curl http://localhost:8080/document?url=https://example.com/article
 4. **Filter by Score**: Only content with sentiment ≥ 0.6 (configurable) is indexed
 5. **Bleve Index** stores positive content for fast full-text search
 6. **Search API** serves queries with results sorted by sentiment and relevance
+
+## API Endpoints
+
+- `GET /api/search?q=query&page=0&size=10` - Search for content
+- `GET /api/document?url=<url>` - Get specific document
+- `GET /api/stats` - Get index statistics
+- `GET /` - Web interface
